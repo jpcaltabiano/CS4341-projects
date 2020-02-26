@@ -1,4 +1,5 @@
 # This is necessary to find the main code
+import math
 import sys
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -39,15 +40,18 @@ class AStarCharacter(CharacterEntity):
         return filter(lambda loc: 0 <= loc[0] < wrld.width() and 0 <= loc[1] < wrld.height() and not wrld.wall_at(loc[0], loc[1]), cells)
 
     def cost(self, wrld, location):
+        nearest_monter = math.inf
+        for monster in wrld.monsters.values():
+            nearest_monter = min(nearest_monter, AStarCharacter.heuristic(location, (monster[0].x, monster[0].y)))
 
-        cost = 1
+        cost = 1 + max(0, (10 - nearest_monter))
 
-        for dist in range(1, 4):
-            for n in AStarCharacter.neighbors(wrld, location, dist):
-                x, y = n
-                if wrld.monsters_at(x, y):
-                    cost += 1
-                    self.set_cell_color(x, y, Fore.RED)
+        # for dist in range(1, 4):
+        #     for n in AStarCharacter.neighbors(wrld, location, dist):
+        #         x, y = n
+        #         if wrld.monsters_at(x, y):
+        #             cost += 1
+        #             self.set_cell_color(x, y, Fore.RED)
 
         return cost
 
@@ -68,8 +72,8 @@ class AStarCharacter(CharacterEntity):
         while not frontier.empty():
             current = frontier.get()
             
-            if current == goal:
-                break
+            # if current == goal:
+            #     break
             
             for next in AStarCharacter.neighbors(graph, current):
                 new_cost = cost_so_far[current] + self.cost(graph, next)
