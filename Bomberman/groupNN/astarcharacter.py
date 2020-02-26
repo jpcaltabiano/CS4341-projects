@@ -12,7 +12,11 @@ from itertools import product, starmap
 class AStarCharacter(CharacterEntity):
 
     def do(self, wrld):
+        self.tiles = {}
         path = self.a_star_search(wrld, (self.x, self.y), (wrld.width() - 1, wrld.height() - 1))
+
+        for step in path:
+            self.set_cell_color(step[0], step[1], Fore.GREEN)
 
         dx = path[1][0] - self.x
         dy = path[1][1] - self.y
@@ -34,15 +38,16 @@ class AStarCharacter(CharacterEntity):
         cells = starmap(lambda dx, dy: (x + dx, y + dy), product(tuple(range(-distance, distance+1)), tuple(range(-distance, distance+1))))
         return filter(lambda loc: 0 <= loc[0] < wrld.width() and 0 <= loc[1] < wrld.height() and not wrld.wall_at(loc[0], loc[1]), cells)
 
-    @staticmethod
-    def cost(wrld, location):
+    def cost(self, wrld, location):
 
         cost = 1
 
-        for n in AStarCharacter.neighbors(wrld, location, 2):
-            x, y = n
-            if wrld.monsters_at(x, y):
-                cost += 10
+        for dist in range(1, 4):
+            for n in AStarCharacter.neighbors(wrld, location, dist):
+                x, y = n
+                if wrld.monsters_at(x, y):
+                    cost += 1
+                    self.set_cell_color(x, y, Fore.RED)
 
         return cost
 
@@ -52,8 +57,7 @@ class AStarCharacter(CharacterEntity):
         (x2, y2) = b
         return abs(x1 - x2) + abs(y1 - y2)
 
-    @staticmethod
-    def a_star_search(graph, start, goal):
+    def a_star_search(self, graph, start, goal):
         frontier = PriorityQueue()
         frontier.put(start, 0)
         came_from = {}
@@ -68,7 +72,7 @@ class AStarCharacter(CharacterEntity):
                 break
             
             for next in AStarCharacter.neighbors(graph, current):
-                new_cost = cost_so_far[current] + 1 #AStarCharacter.cost(graph, next)
+                new_cost = cost_so_far[current] + self.cost(graph, next)
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
                     priority = new_cost + AStarCharacter.heuristic(goal, next)
