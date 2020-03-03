@@ -11,7 +11,7 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
-from astarcharacter import AStarCharacter
+from approxqcharacter import ApproxQCharacter
 
 # Create the game
 random.seed(123) # TODO Change this if you want different random choices
@@ -27,7 +27,7 @@ g.add_monster(SelfPreservingMonster("aggressive", # name
 ))
 
 
-g.add_character(AStarCharacter("me", # name
+g.add_character(ApproxQCharacter("me", # name
                               "C",  # avatar
                               0, 0  # position
 ))
