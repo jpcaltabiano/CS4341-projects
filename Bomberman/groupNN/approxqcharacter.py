@@ -14,17 +14,24 @@ import numpy as np
 
 class ApproxQCharacter(CharacterEntity):
 
+    def __init__(self, name, avatar, x, y):
+        super().__init__(name, avatar, x, y)
+        self.ws = [2, 2, 2, 2]
+
     def do(self, wrld):
-        weights = [2, 2, 2, 2]
-        next_move = self.choose_move(wrld, weights)
+        # weights = [2, 2, 2, 2]
+        next_move = self.choose_move(wrld, self.ws)
 
         print(next_move)
-        self.move(next_move[0][0], next_move[0][1])
-
+        dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
+        self.move(dx, dy)
+ 
         state_fts = self.get_features(wrld, (self.x, self.y))
-        state_val = (state_fts * weights).sum()
+        state_val = (state_fts * self.ws).sum()
 
-        weights = self.update_weights(weights, state_val, next_move, 10, 0.5)
+        reward = -1 if (dx, dy) == (0, 0) else 2
+
+        self.ws = self.update_weights(self.ws, state_val, next_move, reward, 0.5)
 
         # features.reshape(1, -1)
         # features = StandardScaler().fit_transform(features)
@@ -32,12 +39,12 @@ class ApproxQCharacter(CharacterEntity):
     def choose_move(self, wrld, weights):
 
         nbors = self.neighbors(wrld, (self.x, self.y))
-        next_move = (0, 0, 0)
+        next_move = (0, -math.inf, 0)
         # selecting the neighbor cell with highest evaluation
         # TODO: Do only if epsilon-greedy chooses exploit over random move
         #   otherwise just find the evaluation of the chosen neighbor
         for n in nbors:
-            # n == (self.x, self.y) or 
+            # n == (self.x, self.y) or
             # if n == (0, 0) or wrld.wall_at(self.x+n[0], self.y+n[1]):
             #     continue
             next_fts = self.get_features(wrld, (n[0], n[1]))
@@ -70,7 +77,10 @@ class ApproxQCharacter(CharacterEntity):
         mdist = self.monster_dist(wrld, loc)
         edist = self.exit_dist(wrld, loc)
         bdist = self.bomb_dist(wrld, loc)
-        return np.array([mdist[0], mdist[1], bdist, edist])
+        features = np.array([mdist[0], mdist[1], bdist, edist])
+        normalized = features / np.linalg.norm(features)
+        return normalized
+
 
     def monster_dist(self, wrld, loc):
         dlist = []
