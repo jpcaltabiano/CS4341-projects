@@ -15,28 +15,47 @@ import numpy as np
 class ApproxQCharacter(CharacterEntity):
 
     def do(self, wrld):
-        features = self.get_features(wrld)
         weights = [2, 2, 2, 2]
-        self.qlearn(features, weights)
-        # print(features)
+        next_move = self.choose_move(wrld, weights)
+
+        print(next_move)
+        self.move(next_move[0][0], next_move[0][1])
+
+        state_fts = self.get_features(wrld, (self.x, self.y))
+        state_val = (state_fts * weights).sum()
+
+        weights = self.update_weights(weights, state_val, next_move, 10, 0.5)
+
         # features.reshape(1, -1)
-        # print(features)
         # features = StandardScaler().fit_transform(features)
-        # print(features)
 
-    def qlearn(self, features, weights):
-        state_val = (features * weights).sum()
+    def choose_move(self, wrld, weights):
 
-        # assuming this is a possible next move to an empty spot
-        # get features of this move, calculate value with current weights?????
-        next_val = 100
-        reward = 10
-        lr = 0.2
-        delta = (reward + next_val) - state_val
+        nbors = self.neighbors(wrld, (self.x, self.y))
+        next_move = (0, 0, 0)
+        # selecting the neighbor cell with highest evaluation
+        # TODO: Do only if epsilon-greedy chooses exploit over random move
+        #   otherwise just find the evaluation of the chosen neighbor
+        for n in nbors:
+            # n == (self.x, self.y) or 
+            # if n == (0, 0) or wrld.wall_at(self.x+n[0], self.y+n[1]):
+            #     continue
+            next_fts = self.get_features(wrld, (n[0], n[1]))
+            next_val = (next_fts * weights).sum()
+            next_move = (n, next_val, next_fts) if next_val > next_move[1] else next_move
+
+        # updating weights should only happen after the move has been made?
+        # Where do the reward values come from?? How will we know to update weights
+        # if we die and the execution ends???
+        return next_move
+
+    def update_weights(self, weights, state_val, next_move, reward, lr):
+        delta = (reward + next_move[1]) - state_val
         print(weights)
         for i, _ in enumerate(weights):
-            weights[i] = weights[i] + (lr * delta * features[i])
+            weights[i] = weights[i] + (lr * delta * next_move[2][i])
         print(weights)
+        return weights
 
     def load_weights(self):
         # will load from somewhere else during training
@@ -47,30 +66,34 @@ class ApproxQCharacter(CharacterEntity):
         return 0
 
     # features (in order) [mdist to mon1, mdist to mon2, mdist to bomb, mdist to exit]
-    def get_features(self, wrld):
-        mdist = self.monster_dist(wrld)
-        edist = self.exit_dist(wrld)
-        bdist = self.bomb_dist(wrld)
+    def get_features(self, wrld, loc):
+        mdist = self.monster_dist(wrld, loc)
+        edist = self.exit_dist(wrld, loc)
+        bdist = self.bomb_dist(wrld, loc)
         return np.array([mdist[0], mdist[1], bdist, edist])
 
-    def monster_dist(self, wrld):
+    def monster_dist(self, wrld, loc):
         dlist = []
         for m in wrld.monsters.values():
             # Manhattan distance
-            dlist.append(abs(self.x - m[0].x) + abs(self.y - m[0].y))
+            dlist.append(abs(loc[0] - m[0].x) + abs(loc[1] - m[0].y))
             # Euclidean distance
         return dlist
 
-    def bomb_dist(self, wrld):
+    def bomb_dist(self, wrld, loc):
         # TODO: just get the closest bomb, currently working under
         # assumption only 1 bomb exists
         if (len(wrld.bombs) == 0): return 0
-        return (abs(self.x - wrld.bombs[0].x) + abs(self.y - wrld.bombs[0].y))
+        return (abs(loc[0] - wrld.bombs[0].x) + abs(loc[1] - wrld.bombs[0].y))
 
-    def exit_dist(self, wrld):
-        return (abs(self.x - wrld.width()-1) + abs(self.y - wrld.height()-1))
+    def exit_dist(self, wrld, loc):
+        return (abs(loc[0] - wrld.width()-1) + abs(loc[1] - wrld.height()-1))
 
-    
+    # TODO: Don't return neighbors you cant move to (walls)
+    def neighbors(self, wrld, location, distance=1):
+        x, y = location
+        cells = starmap(lambda dx, dy: (x + dx, y + dy), product(tuple(range(-distance, distance+1)), tuple(range(-distance, distance+1))))
+        return filter(lambda loc: 0 <= loc[0] < wrld.width() and 0 <= loc[1] < wrld.height() and not wrld.wall_at(loc[0], loc[1]), cells)
 
     '''
 
