@@ -37,12 +37,10 @@ class ApproxQCharacter(CharacterEntity):
         print(next_move)
 
         #TODO: Can you cal place_bomb(), then move() in the same call to do()?
-        if next_move[3]:
-            self.place_bomb()
-        else:
-            dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
-            self.move(dx, dy)
-            self.visited.append(next_move[0])
+        if next_move[3]: self.place_bomb()
+        dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
+        self.move(dx, dy)
+        self.visited.append(next_move[0])
  
         reward = self.get_reward(wrld, next_move)
         lr = 0.5
@@ -75,7 +73,8 @@ class ApproxQCharacter(CharacterEntity):
         move = list(nbors)[random.randint(0, len(list(nbors)))]
         fts = self.get_features(wrld, (move[0], move[1]), False)
         val = (fts * self.ws).sum()
-        return (move, val, fts, False)
+        b = True if random.random() > 0.5 else False
+        return (move, val, fts, b)
 
     def choose_best_move(self, wrld):
         nbors = self.neighbors(wrld, (self.x, self.y))
