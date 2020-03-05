@@ -19,7 +19,7 @@ class ApproxQCharacter(CharacterEntity):
 
     def __init__(self, name, avatar, x, y):
         super().__init__(name, avatar, x, y)
-        self.ws = [0, 0, 0, 0, 0]
+        self.ws = [0, 0, 0, 0]
         self.visited = []
 
     def do(self, wrld):
@@ -112,18 +112,19 @@ class ApproxQCharacter(CharacterEntity):
         edist = self.exit_dist(wrld, loc)
         bdist = self.bomb_dist(wrld, loc)
         place_bomb = 1 if bomb else 0
-        features = np.array([mdist[0], mdist[1], bdist, edist, place_bomb])
+        features = np.array([mdist, bdist, edist, place_bomb])
         normalized = features / np.linalg.norm(features)
         return normalized
 
 
     def monster_dist(self, wrld, loc):
-        dlist = []
-        for m in wrld.monsters.values():
-            # Manhattan distance
-            dlist.append(abs(loc[0] - m[0].x) + abs(loc[1] - m[0].y))
-            # Euclidean distance
-        return dlist
+        # Get the distance to the closest monster or 25
+        if not wrld.monsters:
+            return 25
+
+        print(wrld.monsters.values())
+
+        return min(map(lambda monster: abs(loc[0] - monster[0].x) + abs(loc[1] - monster[0].y), wrld.monsters.values()))
 
     def bomb_dist(self, wrld, loc):
         # Get the distance to the closest bomb or 25
