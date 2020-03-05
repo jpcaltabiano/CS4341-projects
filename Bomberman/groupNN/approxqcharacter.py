@@ -12,7 +12,6 @@ from itertools import product, starmap
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 import random
-import time
 
 #TODO: Are there going to be more than one non-monster player chars at a time?
 class ApproxQCharacter(CharacterEntity):
@@ -23,8 +22,6 @@ class ApproxQCharacter(CharacterEntity):
         self.visited = []
 
     def do(self, wrld):
-        random.seed(time.time())
-
         state_fts = self.get_features(wrld, (self.x, self.y), False)
         state_val = (state_fts * self.ws).sum()
 
