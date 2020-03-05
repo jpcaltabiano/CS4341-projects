@@ -11,49 +11,84 @@ from itertools import product, starmap
 
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+import random
+import time
 
+#TODO: Are there going to be more than one non-monster player chars at a time?
 class ApproxQCharacter(CharacterEntity):
 
     def __init__(self, name, avatar, x, y):
         super().__init__(name, avatar, x, y)
-        self.ws = [2, 2, 2, 2]
+        self.ws = [0, 0, 0, 0, 0]
+        self.visited = []
 
     def do(self, wrld):
-        # weights = [2, 2, 2, 2]
-        next_move = self.choose_move(wrld, self.ws)
+        random.seed(time.time())
 
-        print(next_move)
-        dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
-        self.move(dx, dy)
- 
-        state_fts = self.get_features(wrld, (self.x, self.y))
+        state_fts = self.get_features(wrld, (self.x, self.y), False)
         state_val = (state_fts * self.ws).sum()
 
-        reward = -1 if (dx, dy) == (0, 0) else 2
+        #TODO: Need to include not moving and placing bomb as a valid action
+        if random.random() > 0.4: 
+            next_move = self.choose_best_move(wrld)
+        else:
+            next_move = self.choose_random_move(wrld)
 
-        self.ws = self.update_weights(self.ws, state_val, next_move, reward, 0.5)
+        print(next_move)
 
-        # features.reshape(1, -1)
-        # features = StandardScaler().fit_transform(features)
+        #TODO: Can you cal place_bomb(), then move() in the same call to do()?
+        if next_move[3]:
+            self.place_bomb()
+        else:
+            dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
+            self.move(dx, dy)
+            self.visited.append(next_move[0])
+ 
+        reward = self.get_reward(wrld, next_move)
+        lr = 0.5
 
-    def choose_move(self, wrld, weights):
+        self.ws = self.update_weights(self.ws, state_val, next_move, reward, lr)
 
+    def get_reward(self, wrld, move):
+        #TODO: How do we know if the agent tries to move to a wall or past boundary?
+        # BOMB_HIT_WALL               = 0
+        # BOMB_HIT_MONSTER            = 1
+        # BOMB_HIT_CHARACTER          = 2
+        # CHARACTER_KILLED_BY_MONSTER = 3
+        # CHARACTER_FOUND_EXIT        = 4
+
+        rw = 0
+        rw = -0.04 if move in self.visited else 0.04
+        if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
+
+        for e in wrld.events:
+            if e == 0: rw = 0.3
+            if e == 1: rw = 0.7
+            if e == 2: rw = -0.9
+            if e == 3: rw = -1
+            if e == 4: rw = 1
+
+        return rw
+        
+    def choose_random_move(self, wrld):
         nbors = self.neighbors(wrld, (self.x, self.y))
-        next_move = (0, -math.inf, 0)
-        # selecting the neighbor cell with highest evaluation
-        # TODO: Do only if epsilon-greedy chooses exploit over random move
-        #   otherwise just find the evaluation of the chosen neighbor
-        for n in nbors:
-            # n == (self.x, self.y) or
-            # if n == (0, 0) or wrld.wall_at(self.x+n[0], self.y+n[1]):
-            #     continue
-            next_fts = self.get_features(wrld, (n[0], n[1]))
-            next_val = (next_fts * weights).sum()
-            next_move = (n, next_val, next_fts) if next_val > next_move[1] else next_move
+        move = list(nbors)[random.randint(0, len(list(nbors)))]
+        fts = self.get_features(wrld, (move[0], move[1]), False)
+        val = (fts * self.ws).sum()
+        return (move, val, fts, False)
 
-        # updating weights should only happen after the move has been made?
-        # Where do the reward values come from?? How will we know to update weights
-        # if we die and the execution ends???
+    def choose_best_move(self, wrld):
+        nbors = self.neighbors(wrld, (self.x, self.y))
+        next_move = (0, -math.inf, 0, False)
+        # selecting the neighbor cell with highest evaluation
+        for n in nbors:
+            next_fts = self.get_features(wrld, (n[0], n[1]), False)
+            next_val = (next_fts * self.ws).sum()
+            next_move = (n, next_val, next_fts, False) if next_val > next_move[1] else next_move
+
+        bomb_fts = self.get_features(wrld, (self.x, self.y), True)
+        bomb_val = (bomb_fts * self.ws).sum()
+        next_move = ((self.x, self.y), bomb_val, bomb_fts, True) if bomb_val > next_move[1] else next_move
         return next_move
 
     def update_weights(self, weights, state_val, next_move, reward, lr):
@@ -73,11 +108,12 @@ class ApproxQCharacter(CharacterEntity):
         return 0
 
     # features (in order) [mdist to mon1, mdist to mon2, mdist to bomb, mdist to exit]
-    def get_features(self, wrld, loc):
+    def get_features(self, wrld, loc, bomb):
         mdist = self.monster_dist(wrld, loc)
         edist = self.exit_dist(wrld, loc)
         bdist = self.bomb_dist(wrld, loc)
-        features = np.array([mdist[0], mdist[1], bdist, edist])
+        place_bomb = 1 if bomb else 0
+        features = np.array([mdist[0], mdist[1], bdist, edist, place_bomb])
         normalized = features / np.linalg.norm(features)
         return normalized
 
@@ -99,7 +135,6 @@ class ApproxQCharacter(CharacterEntity):
     def exit_dist(self, wrld, loc):
         return (abs(loc[0] - wrld.width()-1) + abs(loc[1] - wrld.height()-1))
 
-    # TODO: Don't return neighbors you cant move to (walls)
     def neighbors(self, wrld, location, distance=1):
         x, y = location
         cells = starmap(lambda dx, dy: (x + dx, y + dy), product(tuple(range(-distance, distance+1)), tuple(range(-distance, distance+1))))
