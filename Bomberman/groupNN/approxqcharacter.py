@@ -126,10 +126,11 @@ class ApproxQCharacter(CharacterEntity):
         return dlist
 
     def bomb_dist(self, wrld, loc):
-        # TODO: just get the closest bomb, currently working under
-        # assumption only 1 bomb exists
-        if (len(wrld.bombs) == 0): return 0
-        return (abs(loc[0] - wrld.bombs[0].x) + abs(loc[1] - wrld.bombs[0].y))
+        # Get the distance to the closest bomb or 25
+        if not wrld.bombs:
+            return 25
+
+        return min(map(lambda bomb: abs(loc[0] - bomb.x) + abs(loc[1] - bomb.y), wrld.bombs.values()))
 
     def exit_dist(self, wrld, loc):
         return (abs(loc[0] - wrld.width()-1) + abs(loc[1] - wrld.height()-1))
