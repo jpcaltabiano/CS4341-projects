@@ -3,6 +3,8 @@ import sys
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
+import pygame
+
 # Import necessary stuff
 import random
 from game import Game
@@ -36,18 +38,26 @@ for i in range(0, epochs):
     ))
 
     ours = ApproxQCharacter("me", # name
-                                "C",  # avatar
-                                0, 0  # position
+                            "C",  # avatar
+                            0, 0  # position
     )
     ours.ws = ws
 
     g.add_character(ours)
 
     # Run!
-    g.go(1)
+    g.display_gui()
+    while not g.done():
+        (g.world, g.events) = g.world.next()
+        pygame.event.clear()
+        g.world.next_decisions()
 
     ws = ours.ws
     ws_history = np.append(ws_history, ws)
+    print(f"Game {i}: {ws}")
+    
+    # g.go(1)
+
 
 print("\n\n\nDONE!\n\n\n")
 print(ws_history)
