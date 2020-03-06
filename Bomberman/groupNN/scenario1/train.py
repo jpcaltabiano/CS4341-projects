@@ -18,7 +18,7 @@ from approxqcharacter import ApproxQCharacter
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
-ws = [0, 0, 100, 0]
+ws = [0, 0, 100]
 
 for i in range(0, 500):
     g = Game.fromfile('map.txt')

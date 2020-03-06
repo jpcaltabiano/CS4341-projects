@@ -19,11 +19,11 @@ class ApproxQCharacter(CharacterEntity):
 
     def __init__(self, name, avatar, x, y):
         super().__init__(name, avatar, x, y)
-        self.ws = [0, 0, 0, 0]
+        self.ws = [0, 0, 0]
         self.visited = []
 
     def do(self, wrld):
-        state_fts = self.get_features(wrld, (self.x, self.y), False)
+        state_fts = self.get_features(wrld, (self.x, self.y))
         state_val = (state_fts * self.ws).sum()
 
         #TODO: Need to include not moving and placing bomb as a valid action
@@ -33,7 +33,8 @@ class ApproxQCharacter(CharacterEntity):
             next_move = self.choose_random_move(wrld)
 
         #TODO: Can you cal place_bomb(), then move() in the same call to do()?
-        if next_move[3]: self.place_bomb()
+        if next_move[0][2]:
+            self.place_bomb()
         dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
         self.move(dx, dy)
         self.visited.append(next_move[0])
@@ -47,7 +48,7 @@ class ApproxQCharacter(CharacterEntity):
         #TODO: How do we know if the agent tries to move to a wall or past boundary?
         rw = 0
         rw = -0.1 if move in self.visited else 0.1
-        if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
+        # if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
 
         for e in wrld.events:
             if e == Event.BOMB_HIT_WALL: rw = 0.3
@@ -59,26 +60,28 @@ class ApproxQCharacter(CharacterEntity):
         return rw
         
     def choose_random_move(self, wrld):
-        nbors = self.neighbors(wrld, (self.x, self.y))
-        move = list(nbors)[random.randint(0, len(list(nbors)))]
-        fts = self.get_features(wrld, (move[0], move[1]), False)
-        val = (fts * self.ws).sum()
-        b = True if random.random() > 0.5 else False
-        return (move, val, fts, b)
+        all_actions = list(self.get_possible_actions(wrld, (self.x, self.y)))
+        return self.get_move_from_action(wrld, random.choice(all_actions))
 
     def choose_best_move(self, wrld):
-        nbors = self.neighbors(wrld, (self.x, self.y))
-        next_move = (0, -math.inf, 0, False)
-        # selecting the neighbor cell with highest evaluation
-        for n in nbors:
-            next_fts = self.get_features(wrld, (n[0], n[1]), False)
-            next_val = (next_fts * self.ws).sum()
-            next_move = (n, next_val, next_fts, False) if next_val > next_move[1] else next_move
+        all_actions = self.get_possible_actions(wrld, (self.x, self.y))
+        moves = map(lambda action: self.get_move_from_action(wrld, action), all_actions)
+        return max(moves, key=lambda move: move[1])
 
-        bomb_fts = self.get_features(wrld, (self.x, self.y), True)
-        bomb_val = (bomb_fts * self.ws).sum()
-        next_move = ((self.x, self.y), bomb_val, bomb_fts, True) if bomb_val > next_move[1] else next_move
-        return next_move
+    def get_move_from_action(self, wrld, action):
+        fts = self.get_features(wrld, (self.x + action[0], self.y + action[1]))
+        val = (fts * self.ws).sum()
+        return (action, val, fts)
+
+    def get_possible_actions(self, wrld, loc):
+        """
+        Get the list of possible actions with the given world state.
+        
+        An action is a dx, dy, and place bomb tuple.
+        """
+        x, y = loc
+
+        return starmap(lambda dx, dy, bomb: (x + dx, y + dy, bomb), product(tuple(range(-1, 1+1)), tuple(range(-1, 1+1)), (True, False)))
 
     def update_weights(self, weights, state_val, next_move, reward, lr):
         delta = (reward + next_move[1]) - state_val
@@ -87,12 +90,11 @@ class ApproxQCharacter(CharacterEntity):
         return weights
 
     # features (in order) [mdist to mon, mdist to bomb, mdist to exit]
-    def get_features(self, wrld, loc, bomb):
+    def get_features(self, wrld, loc):
         mdist = self.monster_dist(wrld, loc)
         edist = self.exit_dist(wrld, loc)
         bdist = self.bomb_dist(wrld, loc)
-        place_bomb = 1 if bomb else 0
-        features = np.array([mdist, bdist, edist, place_bomb])
+        features = np.array([mdist, bdist, edist])
         normalized = features / np.linalg.norm(features)
         return normalized
 
