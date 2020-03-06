@@ -38,23 +38,25 @@ class ApproxQCharacter(CharacterEntity):
         
         self.visited.append((self.x, self.y))
  
-        reward = self.get_reward(wrld, next_move)
+        reward = self.get_reward(wrld, next_move[0])
         lr = 0.01
 
         self.ws = self.update_weights(self.ws, state_val, next_move, reward, lr)
 
-    def get_reward(self, wrld, move):
-        #TODO: How do we know if the agent tries to move to a wall or past boundary?
+    def get_reward(self, wrld, action):
         rw = 0
-        rw = -0.1 if move in self.visited else 0.1
-        # if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
+
+        if (action[0], action[1]) in self.visited:
+            rw += -0.04
+        else:
+            rw += 0.04
 
         for e in wrld.events:
             if e == Event.BOMB_HIT_WALL: rw = 0.3
             if e == Event.BOMB_HIT_MONSTER: rw = 0.7
-            if e == Event.BOMB_HIT_CHARACTER: rw = -0.9
-            if e == Event.CHARACTER_KILLED_BY_MONSTER: rw = -1
-            if e == Event.CHARACTER_FOUND_EXIT: rw = 1
+            if e == Event.BOMB_HIT_CHARACTER: rw = -1.0
+            if e == Event.CHARACTER_KILLED_BY_MONSTER: rw = -1.0
+            if e == Event.CHARACTER_FOUND_EXIT: rw = 1.0
 
         print("qchar reward: ", rw)
         return rw
