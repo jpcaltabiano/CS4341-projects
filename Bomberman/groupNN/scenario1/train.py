@@ -22,7 +22,7 @@ from matplotlib import pyplot as plt
 random.seed() # TODO Change this if you want different random choices
 
 ws = [0, 0, 0]
-epochs = 100
+epochs = 500
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
@@ -48,7 +48,7 @@ for i in range(0, epochs):
     # g.display_gui()
     # while not g.done():
     #     (g.world, g.events) = g.world.next()
-    #     g.display_gui()
+    #     # g.display_gui()
     #     pygame.event.clear()
     #     g.world.next_decisions()
 

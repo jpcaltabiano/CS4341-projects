@@ -14,11 +14,13 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import random
 
-#TODO: Are there going to be more than one non-monster player chars at a time?
 class ApproxQCharacter(CharacterEntity):
 
     def __init__(self, name, avatar, x, y):
         super().__init__(name, avatar, x, y)
+        self.alpha = 0.2
+        self.epsilon = 0.05
+
         self.ws = [0, 0, 0]
         self.visited = []
         self.exitSuccess = 0
@@ -29,8 +31,7 @@ class ApproxQCharacter(CharacterEntity):
         state_fts = self.get_features(wrld, (self.x, self.y))
         state_val = (state_fts * self.ws).sum()
 
-        #TODO: Need to include not moving and placing bomb as a valid action
-        if random.random() > 0.2: 
+        if random.random() < self.epsilon:
             next_move = self.choose_best_move(wrld)
         else:
             next_move = self.choose_random_move(wrld)
@@ -42,9 +43,7 @@ class ApproxQCharacter(CharacterEntity):
         self.visited.append((self.x, self.y))
  
         reward = self.get_reward(wrld, next_move[0])
-        lr = 0.01
-
-        self.ws = self.update_weights(self.ws, state_val, next_move, reward, lr)
+        self.ws = self.update_weights(self.ws, state_val, next_move, reward)
 
     def get_reward(self, wrld, action):
         rw = 0
@@ -67,7 +66,7 @@ class ApproxQCharacter(CharacterEntity):
                 rw = 1
                 self.exitSuccess += 1
 
-        print("qchar reward: ", rw)
+        print("Reward: ", rw)
         return rw
         
     def choose_random_move(self, wrld):
@@ -97,10 +96,10 @@ class ApproxQCharacter(CharacterEntity):
         return filter(lambda action: 0 <= action[0] + x < wrld.width() and 0 <= action[1] + y < wrld.height() and not wrld.wall_at(action[0] + x, action[1] + y), all_actions)
 
 
-    def update_weights(self, weights, state_val, next_move, reward, lr):
+    def update_weights(self, weights, state_val, next_move, reward):
         delta = (reward + next_move[1]) - state_val
         for i, _ in enumerate(weights):
-            weights[i] = weights[i] + (lr * delta * next_move[2][i])
+            weights[i] = weights[i] + (self.alpha * delta * next_move[2][i])
         return weights
 
     # features (in order) [mdist to mon, mdist to bomb, mdist to exit]
