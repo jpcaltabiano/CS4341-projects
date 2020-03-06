@@ -22,7 +22,7 @@ class ApproxQCharacter(CharacterEntity):
         self.epsilon = 0.05
 
         self.ws = [0, 0, 0]
-        self.visited = []
+        self.visited = set()
         self.exitSuccess = 0
         self.monsterKilled = 0
         self.wallExploded = 0
@@ -40,7 +40,7 @@ class ApproxQCharacter(CharacterEntity):
             self.place_bomb()
         self.move(next_move[0][0], next_move[0][1])
         
-        self.visited.append((self.x, self.y))
+        self.visited.add((self.x, self.y))
  
         reward = self.get_reward(wrld, next_move[0])
         self.ws = self.update_weights(self.ws, state_val, next_move, reward)
