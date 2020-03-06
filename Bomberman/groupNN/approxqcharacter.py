@@ -21,6 +21,7 @@ class ApproxQCharacter(CharacterEntity):
         super().__init__(name, avatar, x, y)
         self.ws = [0, 0, 0]
         self.visited = []
+        self.exitSuccess = 0
 
     def do(self, wrld):
         state_fts = self.get_features(wrld, (self.x, self.y))
@@ -54,7 +55,9 @@ class ApproxQCharacter(CharacterEntity):
             if e == Event.BOMB_HIT_MONSTER: rw = 0.7
             if e == Event.BOMB_HIT_CHARACTER: rw = -0.9
             if e == Event.CHARACTER_KILLED_BY_MONSTER: rw = -1
-            if e == Event.CHARACTER_FOUND_EXIT: rw = 1
+            if e == Event.CHARACTER_FOUND_EXIT:
+                rw = 1
+                self.exitSuccess = self.exitSuccess + 1
 
         print("qchar reward: ", rw)
         return rw
