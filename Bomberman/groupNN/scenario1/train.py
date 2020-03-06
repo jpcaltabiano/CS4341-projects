@@ -3,6 +3,8 @@ import sys
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
+import pygame
+
 # Import necessary stuff
 import random
 from game import Game
@@ -18,7 +20,7 @@ random.seed() # TODO Change this if you want different random choices
 
 ws = [0, 0, 0, 0]
 
-for i in range(0, 50):
+for i in range(0, 500):
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("stupid", # name
                                 "S",      # avatar
@@ -31,17 +33,25 @@ for i in range(0, 50):
     ))
 
     ours = ApproxQCharacter("me", # name
-                                "C",  # avatar
-                                0, 0  # position
+                            "C",  # avatar
+                            0, 0  # position
     )
     ours.ws = ws
 
     g.add_character(ours)
 
     # Run!
-    g.go(1)
+    g.display_gui()
+    while not g.done():
+        (g.world, g.events) = g.world.next()
+        pygame.event.clear()
+        g.world.next_decisions()
 
     ws = ours.ws
+    print(f"Game {i}: {ws}")
+    
+    # g.go(1)
+
 
 print("\n\n\nDONE!\n\n\n")
 print(ws)

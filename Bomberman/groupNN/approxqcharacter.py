@@ -38,7 +38,7 @@ class ApproxQCharacter(CharacterEntity):
         self.visited.append(next_move[0])
  
         reward = self.get_reward(wrld, next_move)
-        lr = 0.01
+        lr = 0.1
 
         self.ws = self.update_weights(self.ws, state_val, next_move, reward, lr)
 
@@ -51,7 +51,7 @@ class ApproxQCharacter(CharacterEntity):
         # CHARACTER_FOUND_EXIT        = 4
 
         rw = 0
-        rw = -0.04 if move in self.visited else 0.04
+        rw = -0.04 if move in self.visited else 0.1
         if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
 
         for e in wrld.events:
