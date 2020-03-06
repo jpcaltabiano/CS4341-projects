@@ -12,13 +12,18 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
 from approxqcharacter import ApproxQCharacter
+import pandas as pd
+import numpy as np
 
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
 ws = [0, 0, 0, 0]
+epochs = 50
+ws_history = np.array((4, 1))
+# pd.DatFrame(columns=['w1', 'w2', 'w3', 'w4'])
 
-for i in range(0, 50):
+for i in range(0, epochs):
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("stupid", # name
                                 "S",      # avatar
@@ -42,6 +47,7 @@ for i in range(0, 50):
     g.go(1)
 
     ws = ours.ws
+    ws_history = np.append(ws_history, ws)
 
 print("\n\n\nDONE!\n\n\n")
-print(ws)
+print(ws_history)
