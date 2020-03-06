@@ -3,6 +3,7 @@ import math
 import sys
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
+from events import Event
 from entity import CharacterEntity
 from colorama import Fore, Back
 
@@ -44,22 +45,16 @@ class ApproxQCharacter(CharacterEntity):
 
     def get_reward(self, wrld, move):
         #TODO: How do we know if the agent tries to move to a wall or past boundary?
-        # BOMB_HIT_WALL               = 0
-        # BOMB_HIT_MONSTER            = 1
-        # BOMB_HIT_CHARACTER          = 2
-        # CHARACTER_KILLED_BY_MONSTER = 3
-        # CHARACTER_FOUND_EXIT        = 4
-
         rw = 0
         rw = -0.04 if move in self.visited else 0.1
         if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
 
         for e in wrld.events:
-            if e == 0: rw = 0.3
-            if e == 1: rw = 0.7
-            if e == 2: rw = -0.9
-            if e == 3: rw = -1
-            if e == 4: rw = 1
+            if e == Event.BOMB_HIT_WALL: rw = 0.3
+            if e == Event.BOMB_HIT_MONSTER: rw = 0.7
+            if e == Event.BOMB_HIT_CHARACTER: rw = -0.9
+            if e == Event.CHARACTER_KILLED_BY_MONSTER: rw = -1
+            if e == Event.CHARACTER_FOUND_EXIT: rw = 1
 
         return rw
         
