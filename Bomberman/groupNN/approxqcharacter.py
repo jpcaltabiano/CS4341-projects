@@ -56,6 +56,7 @@ class ApproxQCharacter(CharacterEntity):
             if e == Event.CHARACTER_KILLED_BY_MONSTER: rw = -1
             if e == Event.CHARACTER_FOUND_EXIT: rw = 1
 
+        print("qchar reward: ", rw)
         return rw
         
     def choose_random_move(self, wrld):
