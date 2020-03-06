@@ -27,7 +27,7 @@ class ApproxQCharacter(CharacterEntity):
         state_val = (state_fts * self.ws).sum()
 
         #TODO: Need to include not moving and placing bomb as a valid action
-        if random.random() > 0.4: 
+        if random.random() > 0.2: 
             next_move = self.choose_best_move(wrld)
         else:
             next_move = self.choose_random_move(wrld)
@@ -39,14 +39,14 @@ class ApproxQCharacter(CharacterEntity):
         self.visited.append(next_move[0])
  
         reward = self.get_reward(wrld, next_move)
-        lr = 0.1
+        lr = 0.01
 
         self.ws = self.update_weights(self.ws, state_val, next_move, reward, lr)
 
     def get_reward(self, wrld, move):
         #TODO: How do we know if the agent tries to move to a wall or past boundary?
         rw = 0
-        rw = -0.04 if move in self.visited else 0.1
+        rw = -0.1 if move in self.visited else 0.1
         if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
 
         for e in wrld.events:
@@ -94,7 +94,7 @@ class ApproxQCharacter(CharacterEntity):
     def save_weights(self):
         return 0
 
-    # features (in order) [mdist to mon1, mdist to mon2, mdist to bomb, mdist to exit]
+    # features (in order) [mdist to mon, mdist to bomb, mdist to exit]
     def get_features(self, wrld, loc, bomb):
         mdist = self.monster_dist(wrld, loc)
         edist = self.exit_dist(wrld, loc)
@@ -120,7 +120,7 @@ class ApproxQCharacter(CharacterEntity):
         return min(map(lambda bomb: abs(loc[0] - bomb.x) + abs(loc[1] - bomb.y), wrld.bombs.values()))
 
     def exit_dist(self, wrld, loc):
-        return (abs(loc[0] - wrld.width()-1) + abs(loc[1] - wrld.height()-1))
+        return abs(loc[0] - wrld.width()-1) + abs(loc[1] - wrld.height()-1)
 
     def neighbors(self, wrld, location, distance=1):
         x, y = location
