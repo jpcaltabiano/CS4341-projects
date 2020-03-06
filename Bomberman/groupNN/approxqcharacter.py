@@ -31,8 +31,6 @@ class ApproxQCharacter(CharacterEntity):
         else:
             next_move = self.choose_random_move(wrld)
 
-        print(next_move)
-
         #TODO: Can you cal place_bomb(), then move() in the same call to do()?
         if next_move[3]: self.place_bomb()
         dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
@@ -40,7 +38,7 @@ class ApproxQCharacter(CharacterEntity):
         self.visited.append(next_move[0])
  
         reward = self.get_reward(wrld, next_move)
-        lr = 0.5
+        lr = 0.01
 
         self.ws = self.update_weights(self.ws, state_val, next_move, reward, lr)
 
@@ -89,10 +87,8 @@ class ApproxQCharacter(CharacterEntity):
 
     def update_weights(self, weights, state_val, next_move, reward, lr):
         delta = (reward + next_move[1]) - state_val
-        print(weights)
         for i, _ in enumerate(weights):
             weights[i] = weights[i] + (lr * delta * next_move[2][i])
-        print(weights)
         return weights
 
     def load_weights(self):
@@ -118,8 +114,6 @@ class ApproxQCharacter(CharacterEntity):
         # Get the distance to the closest monster or 25
         if not wrld.monsters:
             return 25
-
-        print(wrld.monsters.values())
 
         return min(map(lambda monster: abs(loc[0] - monster[0].x) + abs(loc[1] - monster[0].y), wrld.monsters.values()))
 

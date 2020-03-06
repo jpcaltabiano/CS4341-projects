@@ -18,7 +18,7 @@ random.seed() # TODO Change this if you want different random choices
 
 ws = [0, 0, 0, 0]
 
-for i in range(0, 10):
+for i in range(0, 50):
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("stupid", # name
                                 "S",      # avatar
