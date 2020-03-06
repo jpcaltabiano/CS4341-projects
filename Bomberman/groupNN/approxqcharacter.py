@@ -32,12 +32,11 @@ class ApproxQCharacter(CharacterEntity):
         else:
             next_move = self.choose_random_move(wrld)
 
-        #TODO: Can you cal place_bomb(), then move() in the same call to do()?
         if next_move[0][2]:
             self.place_bomb()
-        dx, dy = next_move[0][0] - self.x, next_move[0][1] - self.y
-        self.move(dx, dy)
-        self.visited.append(next_move[0])
+        self.move(next_move[0][0], next_move[0][1])
+        
+        self.visited.append((self.x, self.y))
  
         reward = self.get_reward(wrld, next_move)
         lr = 0.01
@@ -81,7 +80,7 @@ class ApproxQCharacter(CharacterEntity):
         """
         x, y = loc
 
-        all_actions = starmap(lambda dx, dy, bomb: (x + dx, y + dy, bomb), product(tuple(range(-1, 1+1)), tuple(range(-1, 1+1)), (True, False)))
+        all_actions = starmap(lambda dx, dy, bomb: (x + dx, y + dy, bomb), product(tuple(range(-1, 1+1)), tuple(range(-1, 1+1)), (False, False)))
 
         return filter(lambda action: 0 <= action[0] + loc[0] < wrld.width() and 0 <= action[1] + loc[1] < wrld.height() and not wrld.wall_at(action[0] + loc[0], action[1] + loc[1]), all_actions)
 

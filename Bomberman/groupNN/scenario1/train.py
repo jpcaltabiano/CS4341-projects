@@ -22,15 +22,15 @@ ws = [0, 0, 100]
 
 for i in range(0, 500):
     g = Game.fromfile('map.txt')
-    g.add_monster(StupidMonster("stupid", # name
-                                "S",      # avatar
-                                3, 5,     # position
-    ))
-    g.add_monster(SelfPreservingMonster("aggressive", # name
-                                        "A",          # avatar
-                                        3, 13,        # position
-                                        2             # detection range
-    ))
+    # g.add_monster(StupidMonster("stupid", # name
+    #                             "S",      # avatar
+    #                             3, 5,     # position
+    # ))
+    # g.add_monster(SelfPreservingMonster("aggressive", # name
+    #                                     "A",          # avatar
+    #                                     3, 13,        # position
+    #                                     2             # detection range
+    # ))
 
     ours = ApproxQCharacter("me", # name
                             "C",  # avatar
@@ -41,17 +41,17 @@ for i in range(0, 500):
     g.add_character(ours)
 
     # Run!
-    g.display_gui()
-    while not g.done():
-        (g.world, g.events) = g.world.next()
-        g.display_gui()
-        pygame.event.clear()
-        g.world.next_decisions()
+    # g.display_gui()
+    # while not g.done():
+    #     (g.world, g.events) = g.world.next()
+    #     g.display_gui()
+    #     pygame.event.clear()
+    #     g.world.next_decisions()
+
+    g.go(1)
 
     ws = ours.ws
     print(f"Game {i}: {ws}")
-
-    # g.go(1)
 
 
 print("\n\n\nDONE!\n\n\n")
