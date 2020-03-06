@@ -21,7 +21,7 @@ from matplotlib import pyplot as plt
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
-ws = [0, 0, 0]
+ws = [0, 0, 0, 0, 0]
 epochs = 500
 
 for i in range(0, epochs):
@@ -56,7 +56,3 @@ for i in range(0, epochs):
 
     ws = ours.ws
     print(f"Game {i}: {ws}")
-
-
-print("\n\n\nDONE!\n\n\n")
-print(ws_history)

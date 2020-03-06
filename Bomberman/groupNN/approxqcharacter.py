@@ -9,6 +9,7 @@ from colorama import Fore, Back
 
 import heapq
 from itertools import product, starmap
+from collections import Counter
 
 from sklearn.preprocessing import StandardScaler
 import numpy as np
@@ -18,11 +19,11 @@ class ApproxQCharacter(CharacterEntity):
 
     def __init__(self, name, avatar, x, y):
         super().__init__(name, avatar, x, y)
-        self.alpha = 0.2
-        self.epsilon = 0.05
+        self.alpha = 0.1
+        self.epsilon = 0.01
 
-        self.ws = [0, 0, 0]
-        self.visited = set()
+        self.ws = [0, 0, 0, 0]
+        self.visited = Counter()
         self.exitSuccess = 0
         self.monsterKilled = 0
         self.wallExploded = 0
@@ -31,40 +32,43 @@ class ApproxQCharacter(CharacterEntity):
         state_fts = self.get_features(wrld, (self.x, self.y))
         state_val = (state_fts * self.ws).sum()
 
-        if random.random() < self.epsilon:
-            next_move = self.choose_best_move(wrld)
+        if random.random() > self.epsilon:
+            move = self.choose_best_move(wrld)
         else:
-            next_move = self.choose_random_move(wrld)
+            move = self.choose_random_move(wrld)
 
-        if next_move[0][2]:
+        print(move, self.ws)
+
+        if move[0][2]:
             self.place_bomb()
-        self.move(next_move[0][0], next_move[0][1])
+        self.move(move[0][0], move[0][1])
         
-        self.visited.add((self.x, self.y))
- 
-        reward = self.get_reward(wrld, next_move[0])
-        self.ws = self.update_weights(self.ws, state_val, next_move, reward)
+        nxt = wrld.next()
+        reward = self.get_reward(nxt[0], nxt[1], move[0])
+        self.ws = self.update_weights(self.ws, state_val, move, reward)
+        self.visited[move[0]] += 1
 
-    def get_reward(self, wrld, action):
+
+    def get_reward(self, wrld, events, action):
         rw = 0
 
-        if (action[0], action[1]) in self.visited:
-            rw += -0.04
+        # Try to keep things moving
+        if action in self.visited:
+            rw += -0.2*self.visited[action]
         else:
             rw += 0.04
 
-        for e in wrld.events:
+        for e in events:
             if e == Event.BOMB_HIT_WALL:
-                rw = 0.3
-                self.wallExploded += 1
+                rw += 0.3
             if e == Event.BOMB_HIT_MONSTER:
-                rw = 0.7
-                self.monsterKilled += 1
-            if e == Event.BOMB_HIT_CHARACTER: rw = -0.9
-            if e == Event.CHARACTER_KILLED_BY_MONSTER: rw = -1
+                rw += 0.7
+            if e == Event.BOMB_HIT_CHARACTER:
+                rw += -1.0
+            if e == Event.CHARACTER_KILLED_BY_MONSTER:
+                rw += -1.0
             if e == Event.CHARACTER_FOUND_EXIT:
-                rw = 1
-                self.exitSuccess += 1
+                rw += 1.0
 
         print("Reward: ", rw)
         return rw
@@ -105,26 +109,45 @@ class ApproxQCharacter(CharacterEntity):
     # features (in order) [mdist to mon, mdist to bomb, mdist to exit]
     def get_features(self, wrld, loc):
         mdist = self.monster_dist(wrld, loc)
-        edist = self.exit_dist(wrld, loc)
         bdist = self.bomb_dist(wrld, loc)
-        features = np.array([mdist, bdist, edist])
+        edist = self.exit_dist(wrld, loc)
+        threat = self.is_threat(wrld, loc)
+        xdist = self.explosion_dist(wrld, loc)
+        features = np.array([mdist, bdist, xdist, threat, (1 / (edist**2))])
         normalized = features / np.linalg.norm(features)
         return normalized
 
 
     def monster_dist(self, wrld, loc):
-        # Get the distance to the closest monster or 25
+        # Get the distance to the closest monster
         if not wrld.monsters:
-            return 25
+            return 10
 
         return min(map(lambda monster: abs(loc[0] - monster[0].x) + abs(loc[1] - monster[0].y), wrld.monsters.values()))
 
     def bomb_dist(self, wrld, loc):
-        # Get the distance to the closest bomb or 25
+        # Get the distance to the closest bomb
         if not wrld.bombs:
-            return 25
+            return 10
 
         return min(map(lambda bomb: abs(loc[0] - bomb.x) + abs(loc[1] - bomb.y), wrld.bombs.values()))
+
+    def explosion_dist(self, wrld, loc):
+        # Get the distance to the closest explosion
+        if not wrld.explosions:
+            return 10
+
+        return min(map(lambda bomb: abs(loc[0] - bomb.x) + abs(loc[1] - bomb.y), wrld.explosions.values()))
+
+    def is_threat(self, wrld, loc):
+        # Is the location threatened
+        nxt = wrld
+        for i in range(0, wrld.bomb_time):
+            nxt = nxt.next()[0]
+            if nxt.explosion_at(loc[0], loc[1]):
+                return 1
+
+        return 0
 
     def exit_dist(self, wrld, loc):
         return abs(loc[0] - wrld.width()-1) + abs(loc[1] - wrld.height()-1)
