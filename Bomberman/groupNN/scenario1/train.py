@@ -21,9 +21,8 @@ from matplotlib import pyplot as plt
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
-ws = [0, 0, 0, 0]
+ws = [0, 0, 0]
 epochs = 100
-# ws_history = np.array((4, 1))
 ws_history = pd.DataFrame(columns=['w1', 'w2', 'w3', 'w4'])
 
 for i in range(0, epochs):
@@ -50,13 +49,14 @@ for i in range(0, epochs):
     # g.display_gui()
     while not g.done():
         (g.world, g.events) = g.world.next()
+        g.display_gui()
         pygame.event.clear()
         g.world.next_decisions()
 
     ws = ours.ws
     print(f"Game {i}: {ws}")
-    
-    g.go(1)
+
+    # g.go(1)
 
     ws_history = ws_history.append({'w1': ws[0], 'w2': ws[1], 'w3': ws[2], 'w4': ws[3]}, ignore_index=True)
 
