@@ -16,14 +16,15 @@ sys.path.insert(1, '../groupNN')
 from approxqcharacter import ApproxQCharacter
 import pandas as pd
 import numpy as np
+from matplotlib import pyplot as plt
 
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
 ws = [0, 0, 0, 0]
-epochs = 50
-ws_history = np.array((4, 1))
-# pd.DatFrame(columns=['w1', 'w2', 'w3', 'w4'])
+epochs = 100
+# ws_history = np.array((4, 1))
+ws_history = pd.DataFrame(columns=['w1', 'w2', 'w3', 'w4'])
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
@@ -46,18 +47,22 @@ for i in range(0, epochs):
     g.add_character(ours)
 
     # Run!
-    g.display_gui()
+    # g.display_gui()
     while not g.done():
         (g.world, g.events) = g.world.next()
         pygame.event.clear()
         g.world.next_decisions()
 
     ws = ours.ws
-    ws_history = np.append(ws_history, ws)
     print(f"Game {i}: {ws}")
     
-    # g.go(1)
+    g.go(1)
 
+    ws_history = ws_history.append({'w1': ws[0], 'w2': ws[1], 'w3': ws[2], 'w4': ws[3]}, ignore_index=True)
+
+
+plt.plot(ws_history)
+plt.show()
 
 print("\n\n\nDONE!\n\n\n")
 print(ws_history)

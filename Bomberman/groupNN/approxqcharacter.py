@@ -46,7 +46,7 @@ class ApproxQCharacter(CharacterEntity):
     def get_reward(self, wrld, move):
         #TODO: How do we know if the agent tries to move to a wall or past boundary?
         rw = 0
-        rw = -0.04 if move in self.visited else 0.1
+        rw = -0.1 if move in self.visited else 0.1
         if move[3] and [0, 1, 2] not in wrld.events: rw = -0.7
 
         for e in wrld.events:
@@ -56,6 +56,7 @@ class ApproxQCharacter(CharacterEntity):
             if e == Event.CHARACTER_KILLED_BY_MONSTER: rw = -1
             if e == Event.CHARACTER_FOUND_EXIT: rw = 1
 
+        print("qchar reward: ", rw)
         return rw
         
     def choose_random_move(self, wrld):
