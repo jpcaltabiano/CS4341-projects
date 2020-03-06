@@ -86,14 +86,6 @@ class ApproxQCharacter(CharacterEntity):
             weights[i] = weights[i] + (lr * delta * next_move[2][i])
         return weights
 
-    def load_weights(self):
-        # will load from somewhere else during training
-        return 0
-
-    # save new weights to file after every move
-    def save_weights(self):
-        return 0
-
     # features (in order) [mdist to mon, mdist to bomb, mdist to exit]
     def get_features(self, wrld, loc, bomb):
         mdist = self.monster_dist(wrld, loc)
@@ -126,18 +118,3 @@ class ApproxQCharacter(CharacterEntity):
         x, y = location
         cells = starmap(lambda dx, dy: (x + dx, y + dy), product(tuple(range(-distance, distance+1)), tuple(range(-distance, distance+1))))
         return filter(lambda loc: 0 <= loc[0] < wrld.width() and 0 <= loc[1] < wrld.height() and not wrld.wall_at(loc[0], loc[1]), cells)
-
-    '''
-
-    Features to use:
-        dist to nearest monster
-        dist to nearest bomb
-        dist to nearest exit
-        direction of monster travel
-        ?
-
-        normalize all features
-
-        can agent tell if monster is stupid or self preserving?
-
-    '''
