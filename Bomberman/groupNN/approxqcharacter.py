@@ -81,9 +81,10 @@ class ApproxQCharacter(CharacterEntity):
         """
         x, y = loc
 
-        all_actions = starmap(lambda dx, dy, bomb: (x + dx, y + dy, bomb), product(tuple(range(-1, 1+1)), tuple(range(-1, 1+1)), (False, False)))
+        all_actions = product(tuple(range(-1, 1+1)), tuple(range(-1, 1+1)), (True, False))
 
-        return filter(lambda action: 0 <= action[0] + loc[0] < wrld.width() and 0 <= action[1] + loc[1] < wrld.height() and not wrld.wall_at(action[0] + loc[0], action[1] + loc[1]), all_actions)
+        return filter(lambda action: 0 <= action[0] + x < wrld.width() and 0 <= action[1] + y < wrld.height() and not wrld.wall_at(action[0] + x, action[1] + y), all_actions)
+
 
     def update_weights(self, weights, state_val, next_move, reward, lr):
         delta = (reward + next_move[1]) - state_val

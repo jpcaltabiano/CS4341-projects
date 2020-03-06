@@ -23,7 +23,6 @@ random.seed() # TODO Change this if you want different random choices
 
 ws = [0, 0, 0]
 epochs = 100
-ws_history = pd.DataFrame(columns=['w1', 'w2', 'w3', 'w4'])
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
