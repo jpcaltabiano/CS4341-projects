@@ -1,0 +1,381 @@
+pygame 1.9.6
+Hello from the pygame community. https://www.pygame.org/contribute.html
+
+TIME LEFT:  4993
++--------+
+|        |
+|        |
+|        |
+|        |
+|   S    |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   A    |
+|        |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4992
+EVENTS
+me found the exit
+
+TIME LEFT:  4997
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|   S    |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|     A  |
+|        |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4996
+EVENTS
+me found the exit
+
+TIME LEFT:  4997
++--------+
+|        |
+|        |
+|        |
+|        |
+|   S    |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|     A  |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4996
+EVENTS
+me found the exit
+
+TIME LEFT:  4997
++--------+
+|        |
+|        |
+|        |
+|        |
+|  S     |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|     A  |
+|        |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4996
+EVENTS
+me found the exit
+
+TIME LEFT:  4993
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|  S     |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   A    |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4992
+EVENTS
+me found the exit
+
+TIME LEFT:  4997
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   S    |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|     A  |
+|        |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4996
+EVENTS
+me found the exit
+
+TIME LEFT:  4996
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|     S  |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|    A   |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4995
+EVENTS
+me found the exit
+
+TIME LEFT:  4992
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|    S   |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   A    |
+|        |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4991
+EVENTS
+me found the exit
+
+TIME LEFT:  4997
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   S    |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   A    |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4996
+EVENTS
+me found the exit
+
+TIME LEFT:  4997
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|    S   |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   A    |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4996
+EVENTS
+me found the exit
+
+TIME LEFT:  4994
++--------+
+|        |
+|       S|
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|  A     |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4993
+EVENTS
+me found the exit
+
+TIME LEFT:  4994
++--------+
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|   S    |
+|        |
+|        |
+|        |
+|        |
+|        |
+|      A |
+|        |
+|        |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4993
+EVENTS
+me found the exit
+
+TIME LEFT:  4997
++--------+
+|        |
+|        |
+|        |
+|        |
+|  S     |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|     A  |
+|        |
+|        |
+|        |
+|     @ #|
++--------+
+SCORES
+me 4996
+EVENTS
+me found the exit
+
+TIME LEFT:  4981
++--------+
+|        |
+|        |
+|        |
+|        |
+|     S  |
+|        |
+|        |
+|        |
+|        |
+|      A |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|       @|
+|       #|
++--------+
+SCORES
+me 4990
+EVENTS
+me found the exit
+High exit success:  2

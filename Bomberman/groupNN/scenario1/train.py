@@ -26,19 +26,19 @@ epochs = 500
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
-    # g.add_monster(StupidMonster("stupid", # name
-    #                             "S",      # avatar
-    #                             3, 5,     # position
-    # ))
-    # g.add_monster(SelfPreservingMonster("aggressive", # name
-    #                                     "A",          # avatar
-    #                                     3, 13,        # position
-    #                                     2             # detection range
-    # ))
+    g.add_monster(StupidMonster("stupid", # name
+                                "S",      # avatar
+                                3, 5,     # position
+    ))
+    g.add_monster(SelfPreservingMonster("aggressive", # name
+                                        "A",          # avatar
+                                        3, 13,        # position
+                                        2             # detection range
+    ))
 
     ours = ApproxQCharacter("me", # name
                             "C",  # avatar
-                            0, 0  # position
+                            5, 18  # position
     )
     ours.ws = ws
 
@@ -51,8 +51,16 @@ for i in range(0, epochs):
     #     # g.display_gui()
     #     pygame.event.clear()
     #     g.world.next_decisions()
+    while not g.done():
+        (g.world, g.events) = g.world.next()
+        pygame.event.clear()
+        g.world.next_decisions()
 
     g.go(1)
 
+    if ours.exitSuccess > 1:
+        print("High exit success: ", ours.exitSuccess)
+        break
+
     ws = ours.ws
-    print(f"Game {i}: {ws}")
+    # print(f"Game {i}: {ws}")

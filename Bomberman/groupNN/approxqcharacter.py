@@ -19,10 +19,11 @@ class ApproxQCharacter(CharacterEntity):
 
     def __init__(self, name, avatar, x, y):
         super().__init__(name, avatar, x, y)
-        self.alpha = 0.1
-        self.epsilon = 0.01
+        self.alpha = 0.01
+        self.epsilon = 0.3
 
-        self.ws = [0, 0, 0, 0]
+        self.ws = [3.29964338e-01 -1.38307946e-01 -4.68591505e-01 -2.90726126e-02 -2.34770847e-03]
+        # self.ws = [0, 0, 0, 0, 0]
         self.visited = Counter()
         self.exitSuccess = 0
         self.monsterKilled = 0
@@ -37,7 +38,7 @@ class ApproxQCharacter(CharacterEntity):
         else:
             move = self.choose_random_move(wrld)
 
-        print(move, self.ws)
+        # print(move, self.ws)
 
         if move[0][2]:
             self.place_bomb()
@@ -52,25 +53,29 @@ class ApproxQCharacter(CharacterEntity):
     def get_reward(self, wrld, events, action):
         rw = 0
 
+        if action[1] == -1: rw += -1.0
         # Try to keep things moving
         if action in self.visited:
-            rw += -0.2*self.visited[action]
+            rw += -0.1*self.visited[action]
         else:
             rw += 0.04
 
         for e in events:
-            if e == Event.BOMB_HIT_WALL:
+            if e.tpe == Event.BOMB_HIT_WALL:
+                self.wallExploded += 1
+                rw += 0.05
+            if e.tpe == Event.BOMB_HIT_MONSTER:
+                self.monsterKilled += 1
                 rw += 0.3
-            if e == Event.BOMB_HIT_MONSTER:
-                rw += 0.7
-            if e == Event.BOMB_HIT_CHARACTER:
+            if e.tpe == Event.BOMB_HIT_CHARACTER:
                 rw += -1.0
-            if e == Event.CHARACTER_KILLED_BY_MONSTER:
-                rw += -1.0
-            if e == Event.CHARACTER_FOUND_EXIT:
-                rw += 1.0
+            if e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                rw += -0.3
+            if e.tpe == Event.CHARACTER_FOUND_EXIT:
+                self.exitSuccess += 1
+                rw += 1.5
 
-        print("Reward: ", rw)
+        # print("Reward: ", rw)
         return rw
         
     def choose_random_move(self, wrld):
@@ -113,7 +118,8 @@ class ApproxQCharacter(CharacterEntity):
         edist = self.exit_dist(wrld, loc)
         threat = self.is_threat(wrld, loc)
         xdist = self.explosion_dist(wrld, loc)
-        features = np.array([mdist, bdist, xdist, threat, (1 / (edist**2))])
+        features = np.array([mdist, bdist, xdist, threat, (1 / (edist))])
+        # features = np.array([mdist, bdist, xdist, threat, edist])
         normalized = features / np.linalg.norm(features)
         return normalized
 
