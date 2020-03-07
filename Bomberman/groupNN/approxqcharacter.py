@@ -14,6 +14,7 @@ from collections import Counter
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 import random
+from sensed_world import SensedWorld
 
 class ApproxQCharacter(CharacterEntity):
 
@@ -22,8 +23,7 @@ class ApproxQCharacter(CharacterEntity):
         self.alpha = 0.01
         self.epsilon = 0.3
 
-        self.ws = [3.29964338e-01 -1.38307946e-01 -4.68591505e-01 -2.90726126e-02 -2.34770847e-03]
-        # self.ws = [0, 0, 0, 0, 0]
+        self.ws = [0, 0, 0, 0, 0, 0, 0, 0]
         self.visited = Counter()
         self.exitSuccess = 0
         self.monsterKilled = 0
@@ -39,26 +39,35 @@ class ApproxQCharacter(CharacterEntity):
             move = self.choose_random_move(wrld)
 
         # print(move, self.ws)
+        print(f"\nI am about to do action: {move[0]}\n")
 
         if move[0][2]:
             self.place_bomb()
         self.move(move[0][0], move[0][1])
+
+        print(f"\nI have just done action: {move[0]}\n")
         
+        # next_wrld = SensedWorld.from_world(wrld)
         nxt = wrld.next()
-        reward = self.get_reward(nxt[0], nxt[1], move[0])
+
+        print(f"\nThe next world has been called: {move[0]}\n")
+
+        reward = self.get_reward(nxt[0], nxt[1], move[0], wrld)
         self.ws = self.update_weights(self.ws, state_val, move, reward)
         self.visited[move[0]] += 1
 
 
-    def get_reward(self, wrld, events, action):
+    def get_reward(self, wrld, events, action, old_wrld):
         rw = 0
 
         if action[1] == -1: rw += -1.0
+
         # Try to keep things moving
-        if action in self.visited:
-            rw += -0.1*self.visited[action]
-        else:
-            rw += 0.04
+        #TODO: A good idea to keep but action is dx dy, not actual cell coords
+        # if action in self.visited:
+        #     rw += -0.1*self.visited[action]
+        # else:
+        #     rw += 0.04
 
         for e in events:
             if e.tpe == Event.BOMB_HIT_WALL:
@@ -72,8 +81,13 @@ class ApproxQCharacter(CharacterEntity):
             if e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
                 rw += -0.3
             if e.tpe == Event.CHARACTER_FOUND_EXIT:
+                print(f"\n\nI have found the exit\n\n")
+                print("\nOLD WORLD:")
+                old_wrld.printit()
+                print("\nNEW WORLD:")
+                wrld.printit()
                 self.exitSuccess += 1
-                rw += 1.5
+                rw += 15
 
         # print("Reward: ", rw)
         return rw
@@ -115,10 +129,13 @@ class ApproxQCharacter(CharacterEntity):
     def get_features(self, wrld, loc):
         mdist = self.monster_dist(wrld, loc)
         bdist = self.bomb_dist(wrld, loc)
-        edist = self.exit_dist(wrld, loc)
         threat = self.is_threat(wrld, loc)
         xdist = self.explosion_dist(wrld, loc)
-        features = np.array([mdist, bdist, xdist, threat, (1 / (edist))])
+        edist = self.exit_dist(wrld, loc)
+        has_bomb = self.has_bomb(wrld, loc)
+        has_monster = self.has_monster(wrld, loc)
+        has_wall = self.has_wall(wrld, loc)
+        features = np.array([mdist, bdist, xdist, threat, edist, has_bomb, has_monster, has_wall])
         # features = np.array([mdist, bdist, xdist, threat, edist])
         normalized = features / np.linalg.norm(features)
         return normalized
@@ -157,3 +174,12 @@ class ApproxQCharacter(CharacterEntity):
 
     def exit_dist(self, wrld, loc):
         return abs(loc[0] - wrld.width()-1) + abs(loc[1] - wrld.height()-1)
+
+    def has_bomb(self, wrld, loc):
+        return 1 if wrld.bomb_at(loc[0], loc[1]) else 0
+
+    def has_monster(self, wrld, loc):
+        return 1 if wrld.monsters_at(loc[0], loc[1]) else 0
+
+    def has_wall(self, wrld, loc):
+        return 1 if wrld.wall_at(loc[0], loc[1]) else 0

@@ -8,6 +8,7 @@ import random
 from game import Game
 from monsters.stupid_monster import StupidMonster
 from monsters.selfpreserving_monster import SelfPreservingMonster
+from interactivecharacter import InteractiveCharacter
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
