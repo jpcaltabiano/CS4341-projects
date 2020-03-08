@@ -29,15 +29,15 @@ epochs = 20
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
-    # g.add_monster(StupidMonster("stupid", # name
-    #                             "S",      # avatar
-    #                             3, 5,     # position
-    # ))
-    # g.add_monster(SelfPreservingMonster("aggressive", # name
-    #                                     "A",          # avatar
-    #                                     3, 13,        # position
-    #                                     2             # detection range
-    # ))
+    g.add_monster(StupidMonster("stupid", # name
+                                "S",      # avatar
+                                3, 5,     # position
+    ))
+    g.add_monster(SelfPreservingMonster("aggressive", # name
+                                        "A",          # avatar
+                                        3, 13,        # position
+                                        2             # detection range
+    ))
 
     ours = ApproxQCharacter("me", # name
                             "C",  # avatar

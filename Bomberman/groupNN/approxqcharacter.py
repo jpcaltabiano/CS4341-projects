@@ -1,5 +1,6 @@
 # This is necessary to find the main code
 import collections
+import heapq
 import math
 import random
 import sys
@@ -7,6 +8,7 @@ import sys
 # from Bomberman.bomberman.entity import CharacterEntity
 # from Bomberman.bomberman.events import Event
 # from Bomberman.bomberman.world import World
+from astarsearch import a_star_search, bfs
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -33,38 +35,24 @@ class ApproxQCharacter(CharacterEntity):
         self.weights = Counter()
 
     def do(self, state: World):
-        action = self.get_action(state)
+        monster = bfs(state, (self.x, self.y), state.monsters_at)
+        if not monster or monster < 5:
+            path = a_star_search(state, (self.x, self.y), (state.width() - 1, state.height() - 1))
+            dx = path[1][0] - self.x
+            dy = path[1][1] - self.y
+            self.move(dx, dy)
+        else:
+            action = self.get_action(state)
 
-        self.move(action.dx, action.dy)
-        if action.bomb:
-            self.place_bomb()
+            self.move(action.dx, action.dy)
+            if action.bomb:
+                self.place_bomb()
 
-        next_state, events = state.next()
-        self.update(state, action, next_state, events)
+            next_state, events = state.next()
+            self.update(state, action, next_state, events)
 
     def next_position(self, action: Action) -> (int, int):
         return self.x + action.dx, self.y + action.dy
-
-    @staticmethod
-    def bfs(state: World, start: (int, int), test):
-        frontier = collections.deque()
-        visited = {}
-        visited[start] = True
-
-        frontier.append((start, 0))
-
-        while not len(frontier) == 0:
-            current = frontier.popleft()
-
-            if test(*(current[0])):
-                return current[1]
-
-            locations = starmap(lambda dx, dy: (current[0][0] + dx, current[0][1] + dy), product(tuple(range(-1, 1+1)), tuple(range(-1, 1+1))))
-            locations = filter(lambda location: ApproxQCharacter.is_legal_location(state, location), locations)
-            for next in locations:
-                if next not in visited:
-                    frontier.append((next, current[1] + 1))
-                    visited[next] = True
 
     def get_features(self, state: World, action: Action) -> Counter:
         """
@@ -73,33 +61,24 @@ class ApproxQCharacter(CharacterEntity):
         features = Counter()
 
         next_position = self.next_position(action)
-        distance_mod = state.width() * state.height()
 
         # Exit
-        features["exit-dx"] = (state.exitcell[0] - next_position[0]) / state.width()
-        features["exit-dy"] = (state.exitcell[1] - next_position[1]) / state.height()
-        features["exit-distance"] = ApproxQCharacter.bfs(state, next_position, state.exit_at) / distance_mod
+        features["exit-distance"] = 1 / bfs(state, next_position, state.exit_at)
 
         # Bomb
-        bomb_distance = ApproxQCharacter.bfs(state, next_position, state.bomb_at)
+        bomb_distance = bfs(state, next_position, state.bomb_at)
         if bomb_distance:
-            features["bomb-distance"] = bomb_distance / distance_mod
-
-        features["bomb-danger-x"] = float(True in (math.fabs(bomb.x - self.x) <= state.expl_range for bomb in state.bombs.values()))
-        features["bomb-danger-y"] = float(True in (math.fabs(bomb.x - self.x) <= state.expl_range for bomb in state.bombs.values()))
-
-        if action.bomb:
-            features["bomb-placed"] = 1.0
+            features["bomb-distance"] = 1 / bomb_distance
 
         # Explosion
-        explosion_distance = ApproxQCharacter.bfs(state, next_position, state.explosion_at)
+        explosion_distance = bfs(state, next_position, state.explosion_at)
         if explosion_distance:
-            features["explosion-distance"] = explosion_distance / distance_mod
+            features["explosion-distance"] = 1 / explosion_distance
 
-        # Wall
-        wall_distance = ApproxQCharacter.bfs(state, next_position, state.wall_at)
-        if wall_distance:
-            features["wall-distance"] = wall_distance / distance_mod
+        # Monster
+        monster_distance = bfs(state, next_position, state.monsters_at)
+        if monster_distance:
+            features["monster-distance"] = 1 / monster_distance
 
         return features
 
@@ -178,19 +157,14 @@ class ApproxQCharacter(CharacterEntity):
         reward = 0.0
 
         if action.bomb:
-            reward -= 0.001
+            reward -= 0.1
 
         for event in events:
-            # if event.tpe == Event.BOMB_HIT_WALL:
-            #     reward += 0.05
-            # if event.tpe == Event.BOMB_HIT_MONSTER:
-            #     self.monsterKilled += 1
-            #     reward += 0.3
             if event.tpe == Event.BOMB_HIT_CHARACTER:
-                reward -= 10
+                reward -= 100000
             if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                reward -= 10
+                reward -= 100000
             if event.tpe == Event.CHARACTER_FOUND_EXIT:
-                reward += 10
+                reward += 100
 
         return reward
