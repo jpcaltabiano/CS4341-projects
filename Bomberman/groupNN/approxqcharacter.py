@@ -31,8 +31,8 @@ class ApproxQCharacter(CharacterEntity):
     def __init__(self, name, avatar, x, y):
         super().__init__(name, avatar, x, y)
 
-        self.alpha = 0.01  # Learning Rate
-        self.epsilon = 0.3  # Exploration Rate
+        self.alpha = 0.1  # Learning Rate
+        self.epsilon = 0.05  # Exploration Rate
         self.gamma = 1.0  # Discount Factor
 
         self.weights = Counter()
@@ -80,17 +80,31 @@ class ApproxQCharacter(CharacterEntity):
         next_position = self.next_position(action)
         distance_mod = state.width() * state.height()
 
+        # Exit
         features["exit-dx"] = (state.exitcell[0] - next_position[0]) / state.width()
         features["exit-dy"] = (state.exitcell[1] - next_position[1]) / state.height()
         features["exit-distance"] = ApproxQCharacter.bfs(state, next_position, state.exit_at) / distance_mod
 
+        # Bomb
         bomb_distance = ApproxQCharacter.bfs(state, next_position, state.bomb_at)
         if bomb_distance:
             features["bomb-distance"] = bomb_distance / distance_mod
 
+        features["bomb-danger-x"] = float(True in (math.fabs(bomb.x - self.x) <= state.expl_range for bomb in state.bombs.values()))
+        features["bomb-danger-y"] = float(True in (math.fabs(bomb.x - self.x) <= state.expl_range for bomb in state.bombs.values()))
+
+        if action.bomb:
+            features["bomb-placed"] = 1.0
+
+        # Explosion
         explosion_distance = ApproxQCharacter.bfs(state, next_position, state.explosion_at)
         if explosion_distance:
             features["explosion-distance"] = explosion_distance / distance_mod
+
+        # Wall
+        wall_distance = ApproxQCharacter.bfs(state, next_position, state.wall_at)
+        if wall_distance:
+            features["wall-distance"] = wall_distance / distance_mod
 
         return features
 
@@ -118,8 +132,8 @@ class ApproxQCharacter(CharacterEntity):
 
     def update(self, state: World, action: Action, next_state: World, events):
         reward = self.get_reward(state, action, next_state, events)
-        print(f"Updating with reward: {reward}")
         features = self.get_features(state, action)
+        print(f"Updating with reward: {reward}; features: {features}")
 
         delta = (reward + self.gamma * self.v(next_state)) - self.q(state, action)
         for feature in features:
@@ -168,6 +182,9 @@ class ApproxQCharacter(CharacterEntity):
     def get_reward(self, state: World, action: Action, next_state: World, events) -> float:
         reward = 0.0
 
+        if action.bomb:
+            reward -= 0.001
+
         for event in events:
             # if event.tpe == Event.BOMB_HIT_WALL:
             #     reward += 0.05
@@ -175,9 +192,9 @@ class ApproxQCharacter(CharacterEntity):
             #     self.monsterKilled += 1
             #     reward += 0.3
             if event.tpe == Event.BOMB_HIT_CHARACTER:
-                reward += -10
+                reward -= 10
             if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                reward += -10
+                reward -= 10
             if event.tpe == Event.CHARACTER_FOUND_EXIT:
                 reward += 10
 

@@ -23,8 +23,9 @@ from matplotlib import pyplot as plt
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
-weights = Counter()
-epochs = 100
+weights = Counter({'bomb-placed': 22.5641562510204, 'bomb-danger-x': 3.517225415554476, 'bomb-danger-y': 3.517225415554476, 'bomb-distance': 1.745708747412083, 'wall-distance': 1.7453208979479906, 'explosion-distance': 0.0005767777766241911, 'exit-distance': -0.2582944211062002, 'exit-dx': -0.5119711189731269, 'exit-dy': -0.9586345917727399})
+# weights = Counter()
+epochs = 20
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
