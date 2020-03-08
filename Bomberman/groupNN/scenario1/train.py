@@ -1,5 +1,7 @@
 # This is necessary to find the main code
 import sys
+from collections import Counter
+
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
@@ -21,26 +23,26 @@ from matplotlib import pyplot as plt
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
-ws = [0, 0, 0, 0, 0]
-epochs = 500
+weights = Counter()
+epochs = 100
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
-    g.add_monster(StupidMonster("stupid", # name
-                                "S",      # avatar
-                                3, 5,     # position
-    ))
-    g.add_monster(SelfPreservingMonster("aggressive", # name
-                                        "A",          # avatar
-                                        3, 13,        # position
-                                        2             # detection range
-    ))
+    # g.add_monster(StupidMonster("stupid", # name
+    #                             "S",      # avatar
+    #                             3, 5,     # position
+    # ))
+    # g.add_monster(SelfPreservingMonster("aggressive", # name
+    #                                     "A",          # avatar
+    #                                     3, 13,        # position
+    #                                     2             # detection range
+    # ))
 
     ours = ApproxQCharacter("me", # name
                             "C",  # avatar
-                            5, 18  # position
+                            0, 0  # position
     )
-    ours.ws = ws
+    ours.weights = weights
 
     g.add_character(ours)
 
@@ -51,16 +53,12 @@ for i in range(0, epochs):
     #     # g.display_gui()
     #     pygame.event.clear()
     #     g.world.next_decisions()
-    while not g.done():
-        (g.world, g.events) = g.world.next()
-        pygame.event.clear()
-        g.world.next_decisions()
+    # while not g.done():
+    #     (g.world, g.events) = g.world.next()
+    #     pygame.event.clear()
+    #     g.world.next_decisions()
 
     g.go(1)
 
-    if ours.exitSuccess > 1:
-        print("High exit success: ", ours.exitSuccess)
-        break
-
-    ws = ours.ws
-    # print(f"Game {i}: {ws}")
+    weights = ours.weights
+    print(f"Game {i}: {weights}")
