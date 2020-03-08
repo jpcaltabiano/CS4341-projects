@@ -36,7 +36,7 @@ class ApproxQCharacter(CharacterEntity):
 
     def do(self, state: World):
         monster = bfs(state, (self.x, self.y), state.monsters_at)
-        if not monster or monster < 5:
+        if monster is None or monster >= 5:
             path = a_star_search(state, (self.x, self.y), (state.width() - 1, state.height() - 1))
             dx = path[1][0] - self.x
             dy = path[1][1] - self.y

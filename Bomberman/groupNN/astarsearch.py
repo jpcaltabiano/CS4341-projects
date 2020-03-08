@@ -84,9 +84,7 @@ def bfs(state: World, start: (int, int), test):
         if test(*(current[0])):
             return current[1]
 
-        locations = starmap(lambda dx, dy: (current[0][0] + dx, current[0][1] + dy), product(tuple(range(-1, 1+1)), tuple(range(-1, 1+1))))
-        locations = filter(lambda location: is_legal_location(state, location), locations)
-        for next in locations:
+        for next in neighbors(state, current[0]):
             if next not in visited:
                 frontier.append((next, current[1] + 1))
                 visited[next] = True

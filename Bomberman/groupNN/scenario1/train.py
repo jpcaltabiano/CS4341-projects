@@ -23,8 +23,7 @@ from matplotlib import pyplot as plt
 # Create the game
 random.seed() # TODO Change this if you want different random choices
 
-weights = Counter({'bomb-placed': 22.5641562510204, 'bomb-danger-x': 3.517225415554476, 'bomb-danger-y': 3.517225415554476, 'bomb-distance': 1.745708747412083, 'wall-distance': 1.7453208979479906, 'explosion-distance': 0.0005767777766241911, 'exit-distance': -0.2582944211062002, 'exit-dx': -0.5119711189731269, 'exit-dy': -0.9586345917727399})
-# weights = Counter()
+weights = Counter()
 epochs = 20
 
 for i in range(0, epochs):
@@ -33,11 +32,11 @@ for i in range(0, epochs):
                                 "S",      # avatar
                                 3, 5,     # position
     ))
-    g.add_monster(SelfPreservingMonster("aggressive", # name
-                                        "A",          # avatar
-                                        3, 13,        # position
-                                        2             # detection range
-    ))
+    # g.add_monster(SelfPreservingMonster("aggressive", # name
+    #                                     "A",          # avatar
+    #                                     3, 13,        # position
+    #                                     2             # detection range
+    # ))
 
     ours = ApproxQCharacter("me", # name
                             "C",  # avatar
@@ -59,7 +58,7 @@ for i in range(0, epochs):
     #     pygame.event.clear()
     #     g.world.next_decisions()
 
-    g.go(1)
+    g.go(10)
 
     weights = ours.weights
     print(f"Game {i}: {weights}")
