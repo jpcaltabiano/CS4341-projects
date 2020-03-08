@@ -20,11 +20,6 @@ from collections import Counter
 
 Action = collections.namedtuple('Action', 'dx dy bomb')
 
-def euclidean_distance(a, b):
-    (x1, y1) = a
-    (x2, y2) = b
-    return abs(x1 - x2) + abs(y1 - y2)
-
 
 class ApproxQCharacter(CharacterEntity):
 
