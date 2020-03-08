@@ -18,7 +18,7 @@ from world import World
 
 def is_legal_location(state: World, location: (int, int)):
     x, y = location
-    return 0 <= x < state.width() and 0 <= y < state.height() and not state.wall_at(x, y)
+    return 0 <= x < state.width() and 0 <= y < state.height() and not state.wall_at(x, y) and not state.explosion_at(x, y)
 
 
 def neighbors(state, location):
@@ -41,6 +41,8 @@ def path(came_from, start, goal):
     path = [goal]
 
     while not path[0] == start:
+        if not path[0] in came_from:
+            return None
         path.insert(0, came_from[path[0]])
 
     return path

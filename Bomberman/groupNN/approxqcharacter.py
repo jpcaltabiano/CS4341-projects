@@ -35,12 +35,17 @@ class ApproxQCharacter(CharacterEntity):
         self.weights = Counter()
 
     def do(self, state: World):
-        monster = bfs(state, (self.x, self.y), state.monsters_at)
-        if monster is None or monster >= 5:
+        next_state, events = state.next()
+        monster = bfs(state, (self.x, self.y), next_state.monsters_at)
+        explosion = bfs(state, (self.x, self.y), next_state.explosion_at)
+        if (monster is None or monster >= 3) and (explosion is None or explosion >= 2):
             path = a_star_search(state, (self.x, self.y), (state.width() - 1, state.height() - 1))
-            dx = path[1][0] - self.x
-            dy = path[1][1] - self.y
-            self.move(dx, dy)
+            if not path:
+                self.place_bomb()
+            else:
+                dx = path[1][0] - self.x
+                dy = path[1][1] - self.y
+                self.move(dx, dy)
         else:
             action = self.get_action(state)
 
@@ -63,12 +68,14 @@ class ApproxQCharacter(CharacterEntity):
         next_position = self.next_position(action)
 
         # Exit
-        features["exit-distance"] = 1 / bfs(state, next_position, state.exit_at)
+        exit_distance = bfs(state, next_position, state.exit_at)
+        if exit_distance:
+            features["exit-distance"] = 1 / exit_distance
 
-        # Bomb
-        bomb_distance = bfs(state, next_position, state.bomb_at)
-        if bomb_distance:
-            features["bomb-distance"] = 1 / bomb_distance
+        # # Bomb
+        # bomb_distance = bfs(state, next_position, state.bomb_at)
+        # if bomb_distance:
+        #     features["bomb-distance"] = 1 / bomb_distance
 
         # Explosion
         explosion_distance = bfs(state, next_position, state.explosion_at)

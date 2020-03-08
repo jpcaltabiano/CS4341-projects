@@ -24,7 +24,7 @@ from matplotlib import pyplot as plt
 random.seed() # TODO Change this if you want different random choices
 
 weights = Counter()
-epochs = 20
+epochs = 50
 
 for i in range(0, epochs):
     g = Game.fromfile('map.txt')
@@ -58,7 +58,7 @@ for i in range(0, epochs):
     #     pygame.event.clear()
     #     g.world.next_decisions()
 
-    g.go(10)
+    g.go(1)
 
     weights = ours.weights
     print(f"Game {i}: {weights}")
