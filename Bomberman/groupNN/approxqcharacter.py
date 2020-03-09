@@ -40,20 +40,21 @@ class ApproxQCharacter(CharacterEntity):
         explosion = bfs(state, (self.x, self.y), state.explosion_at)
         behind = 0
         print(monster)
-        if (monster < 4):
-            m = bfs_pos(state, (self.x, self.y), state.monsters_at)
-            e = bfs_pos(state, (self.x, self.y), state.exit_at)
-            mx, my = m[0][0], m[0][1]
-            ex, ey = e[0][0], e[0][1]
+        ## this can cause an error and we dont have time to debug but we tried
+        # if (monster is None or monster <= 3):
+        #     m = bfs_pos(state, (self.x, self.y), state.monsters_at)
+        #     e = bfs_pos(state, (self.x, self.y), state.exit_at)
+        #     mx, my = m[0][0], m[0][1]
+        #     ex, ey = e[0][0], e[0][1]
 
-            mslope = (my - self.y) / (mx - self.x)
-            eslope = (ey - self.y) / (ex - self.x)
+        #     mslope = (self.y - my) / (self.x - mx)
+        #     eslope = (self.y - ey) / (self.x - ex)
 
-            angle = math.degrees(math.atan((eslope - mslope)/(1 + eslope*mslope)))
-            print(mslope, eslope, angle)
-            if (mslope < 0 and eslope > 0) or (mslope > 0 and eslope < 0): angle = 180 - angle
-            print(mslope, eslope, angle)
-            if angle > 90: behind = 1
+        #     angle = math.degrees(math.atan((eslope - mslope)/(1 + eslope*mslope)))
+        #     print(mslope, eslope, angle)
+        #     if (mslope < 0 and eslope > 0) or (mslope > 0 and eslope < 0): angle = 180 - abs(angle)
+        #     print(mslope, eslope, angle)
+        #     if angle > 90: behind = 1
         
         if (monster is None or monster >= 3) and (explosion is None or explosion >= 2) and behind:
             path = a_star_search(state, (self.x, self.y), (state.width() - 1, state.height() - 1))
