@@ -11,7 +11,7 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 from interactivecharacter import InteractiveCharacter
 
 # TODO This is your code!
-sys.path.insert(1, '../groupNN')
+sys.path.insert(1, '../group17')
 from approxqcharacter import ApproxQCharacter
 
 # Create the game

@@ -14,7 +14,7 @@ from monsters.stupid_monster import StupidMonster
 from monsters.selfpreserving_monster import SelfPreservingMonster
 
 # TODO This is your code!
-sys.path.insert(1, '../groupNN')
+sys.path.insert(1, '../group17')
 from approxqcharacter import ApproxQCharacter
 import pandas as pd
 import numpy as np

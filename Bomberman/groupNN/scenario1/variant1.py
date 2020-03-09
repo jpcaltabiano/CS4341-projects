@@ -7,10 +7,11 @@ sys.path.insert(1, '..')
 from game import Game
 
 # TODO This is your code!
-sys.path.insert(1, '../groupNN')
+sys.path.insert(1, '../group17')
 
 # Uncomment this if you want the empty test character
 from approxqcharacter import ApproxQCharacter
+from astarcharacter import AStarCharacter
 
 # Uncomment this if you want the interactive character
 # from interactivecharacter import InteractiveCharacter
@@ -21,7 +22,7 @@ g = Game.fromfile('map.txt')
 # TODO Add your character
 
 # Uncomment this if you want the test character
-g.add_character(ApproxQCharacter("me", # name
+g.add_character(AStarCharacter("me", # name
                               "C",  # avatar
                               0, 0  # position
 ))
