@@ -201,6 +201,6 @@ class ApproxQCharacter(CharacterEntity):
             if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
                 reward -= 100000
             if event.tpe == Event.CHARACTER_FOUND_EXIT:
-                reward += 100000
+                reward += 100
 
         return reward
