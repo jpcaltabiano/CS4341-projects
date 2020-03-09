@@ -8,7 +8,7 @@ import sys
 # from Bomberman.bomberman.entity import CharacterEntity
 # from Bomberman.bomberman.events import Event
 # from Bomberman.bomberman.world import World
-from astarsearch import a_star_search, bfs
+from astarsearch import a_star_search, bfs, bfs_pos
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -36,9 +36,26 @@ class ApproxQCharacter(CharacterEntity):
 
     def do(self, state: World):
         next_state, events = state.next()
-        monster = bfs(state, (self.x, self.y), next_state.monsters_at)
-        explosion = bfs(state, (self.x, self.y), next_state.explosion_at)
-        if (monster is None or monster >= 3) and (explosion is None or explosion >= 2):
+        monster = bfs(state, (self.x, self.y), state.monsters_at)
+        explosion = bfs(state, (self.x, self.y), state.explosion_at)
+        behind = 0
+        print(monster)
+        if (monster < 4):
+            m = bfs_pos(state, (self.x, self.y), state.monsters_at)
+            e = bfs_pos(state, (self.x, self.y), state.exit_at)
+            mx, my = m[0][0], m[0][1]
+            ex, ey = e[0][0], e[0][1]
+
+            mslope = (my - self.y) / (mx - self.x)
+            eslope = (ey - self.y) / (ex - self.x)
+
+            angle = math.degrees(math.atan((eslope - mslope)/(1 + eslope*mslope)))
+            print(mslope, eslope, angle)
+            if (mslope < 0 and eslope > 0) or (mslope > 0 and eslope < 0): angle = 180 - angle
+            print(mslope, eslope, angle)
+            if angle > 90: behind = 1
+        
+        if (monster is None or monster >= 3) and (explosion is None or explosion >= 2) and behind:
             path = a_star_search(state, (self.x, self.y), (state.width() - 1, state.height() - 1))
             if not path:
                 self.place_bomb()
@@ -67,6 +84,13 @@ class ApproxQCharacter(CharacterEntity):
 
         next_position = self.next_position(action)
 
+        if state.bomb_at(next_position[0], next_position[1]):
+            features['bomb_at'] = 1
+        if state.monsters_at(next_position[0], next_position[1]):
+            features['monster_at'] = 1
+        if state.explosion_at(next_position[0], next_position[1]):
+            features['expl_at'] = 1
+
         # Exit
         exit_distance = bfs(state, next_position, state.exit_at)
         if exit_distance:
@@ -80,6 +104,10 @@ class ApproxQCharacter(CharacterEntity):
         # Explosion
         explosion_distance = bfs(state, next_position, state.explosion_at)
         if explosion_distance:
+            print(f"An explosion found at {next_position} after taking action {action}")
+            print("This is the world... ***********************\n\n")
+            state.printit()
+            print("\n\n***********************\n\n")
             features["explosion-distance"] = 1 / explosion_distance
 
         # Monster
@@ -114,7 +142,7 @@ class ApproxQCharacter(CharacterEntity):
     def update(self, state: World, action: Action, next_state: World, events):
         reward = self.get_reward(state, action, next_state, events)
         features = self.get_features(state, action)
-        print(f"Updating with reward: {reward}; features: {features}")
+        # print(f"Updating with reward: {reward}; features: {features}; action was: {action}")
 
         delta = (reward + self.gamma * self.v(next_state)) - self.q(state, action)
         for feature in features:

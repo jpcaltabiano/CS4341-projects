@@ -84,7 +84,28 @@ def bfs(state: World, start: (int, int), test):
         current = frontier.popleft()
 
         if test(*(current[0])):
+            # print(test, test(*(current[0])), current, visited)
             return current[1]
+
+        for next in neighbors(state, current[0]):
+            if next not in visited:
+                frontier.append((next, current[1] + 1))
+                visited[next] = True
+
+# also returns location , easier than changing original func and all uses
+def bfs_pos(state: World, start: (int, int), test):
+    frontier = collections.deque()
+    visited = {}
+    visited[start] = True
+
+    frontier.append((start, 0))
+
+    while not len(frontier) == 0:
+        current = frontier.popleft()
+
+        if test(*(current[0])):
+            # print(test, test(*(current[0])), current, visited)
+            return current
 
         for next in neighbors(state, current[0]):
             if next not in visited:
